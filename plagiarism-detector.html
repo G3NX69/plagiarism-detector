@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentGuard | Plagiarism & AI Detector</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 30px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: var(--border-radius);
+            resize: vertical;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .word-count {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .check-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5d0a94;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .result-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .result-card {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .plagiarism .result-value {
+            color: var(--danger);
+        }
+
+        .ai .result-value {
+            color: var(--warning);
+        }
+
+        .progress-container {
+            height: 12px;
+            background: var(--gray-light);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
+        }
+
+        .plagiarism .progress-bar {
+            background: var(--danger);
+        }
+
+        .ai .progress-bar {
+            background: var(--warning);
+        }
+
+        .result-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .result-description {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .sources {
+            margin-top: 30px;
+        }
+
+        .source-list {
+            list-style: none;
+        }
+
+        .source-item {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-item:last-child {
+            border-bottom: none;
+        }
+
+        .source-url {
+            color: var(--primary);
+            text-decoration: none;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 15px;
+        }
+
+        .source-url:hover {
+            text-decoration: underline;
+        }
+
+        .source-similarity {
+            background: var(--danger);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        .mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .dark-mode {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            color: #f0f0f0;
+        }
+
+        .dark-mode .card {
+            background: #2d2d2d;
+        }
+
+        .dark-mode textarea {
+            background: #1e1e1e;
+            color: #f0f0f0;
+            border-color: #444;
+        }
+
+        .dark-mode .word-count {
+            color: #aaa;
+        }
+
+        @media (max-width: 768px) {
+            .result-container {
+                flex-direction: column;
+            }
+            
+            .result-card {
+                min-width: 100%;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .check-options {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="mode-toggle" id="modeToggle">
+        <i class="fas fa-moon"></i>
+    </button>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shield-alt"></i> ContentGuard</h1>
+            <p>Advanced plagiarism detection and AI-generated content analysis for students, educators, and content creators</p>
+        </header>
+        
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-edit"></i> Enter Your Content
+                </div>
+                <div class="card-body">
+                    <div class="input-container">
+                        <textarea id="contentInput" placeholder="Paste your text here (minimum 100 words for accurate analysis)..."></textarea>
+                        <div class="controls">
+                            <div class="word-count">
+                                <i class="fas fa-font"></i> Words: <span id="wordCount">0</span>
+                            </div>
+                            <div class="check-options">
+                                <button class="btn btn-outline" id="clearBtn">
+                                    <i class="fas fa-trash"></i> Clear
+                                </button>
+                                <button class="btn btn-primary" id="checkPlagiarismBtn">
+                                    <i class="fas fa-search"></i> Check Plagiarism
+                                </button>
+                                <button class="btn btn-secondary" id="checkAIBtn">
+                                    <i class="fas fa-robot"></i> Detect AI Content
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner"></div>
+                <h3>Analyzing your content...</h3>
+                <p>Scanning billions of documents and using advanced AI detection algorithms</p>
+            </div>
+            
+            <div id="resultsSection" style="display: none;">
+                <div class="result-container">
+                    <div class="card result-card plagiarism">
+                        <div class="card-header">
+                            <i class="fas fa-clone"></i> Plagiarism Detection
+                        </div>
+                        <div class="card-body">
+                            <div class="result-value" id="plagiarismValue">0%</div>
+                            <div class="result-label" id="plagiarismLabel">Original Content</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="plagiarismBar" style="width: 0%"></div>
+                            </div>
+                            <div class="result-description">
+                                <p id="plagiarismDescription">Your content shows no signs of plagiarism.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card result-card ai">
+                        <div class="card-header">
+                            <i class="fas fa-robot"></i> AI Content Detection
+                        </div>
+                        <div class="card-body">
+                            <div class="result-value" id="aiValue">0%</div>
+                            <div class="result-label" id="aiLabel">Human Written</div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="aiBar" style="width: 0%"></div>
+                            </div>
+                            <div class="result-description">
+                                <p id="aiDescription">Your content appears to be written by a human.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card sources" id="sourcesSection" style="display: none;">
+                    <div class="card-header">
+                        <i class="fas fa-link"></i> Potential Sources
+                    </div>
+                    <div class="card-body">
+                        <ul class="source-list" id="sourceList">
+                            <!-- Sources will be added here dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>ContentGuard &copy; 2023 | Advanced content analysis for academic and professional integrity</p>
+            <p>Note: This is a demonstration interface. For real detection, integration with plagiarism databases and AI detection APIs would be required.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const contentInput = document.getElementById('contentInput');
+        const wordCount = document.getElementById('wordCount');
+        const clearBtn = document.getElementById('clearBtn');
+        const checkPlagiarismBtn = document.getElementById('checkPlagiarismBtn');
+        const checkAIBtn = document.getElementById('checkAIBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsSection = document.getElementById('resultsSection');
+        const plagiarismValue = document.getElementById('plagiarismValue');
+        const plagiarismLabel = document.getElementById('plagiarismLabel');
+        const plagiarismBar = document.getElementById('plagiarismBar');
+        const plagiarismDescription = document.getElementById('plagiarismDescription');
+        const aiValue = document.getElementById('aiValue');
+        const aiLabel = document.getElementById('aiLabel');
+        const aiBar = document.getElementById('aiBar');
+        const aiDescription = document.getElementById('aiDescription');
+        const sourcesSection = document.getElementById('sourcesSection');
+        const sourceList = document.getElementById('sourceList');
+        const modeToggle = document.getElementById('modeToggle');
+        
+        // Update word count
+        contentInput.addEventListener('input', () => {
+            const text = contentInput.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            wordCount.textContent = words;
+        });
+        
+        // Clear button
+        clearBtn.addEventListener('click', () => {
+            contentInput.value = '';
+            wordCount.textContent = '0';
+            resultsSection.style.display = 'none';
+        });
+        
+        // Check plagiarism
+        checkPlagiarismBtn.addEventListener('click', () => {
+            if (validateInput()) {
+                runAnalysis('plagiarism');
+            }
+        });
+        
+        // Check AI content
+        checkAIBtn.addEventListener('click', () => {
+            if (validateInput()) {
+                runAnalysis('ai');
+            }
+        });
+        
+        // Dark mode toggle
+        modeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = modeToggle.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        });
+        
+        // Validate input
+        function validateInput() {
+            const text = contentInput.value.trim();
+            if (!text) {
+                alert('Please enter some text to analyze.');
+                return false;
+            }
+            
+            const words = text.split(/\s+/).length;
+            if (words < 50) {
+                alert('For accurate results, please enter at least 50 words.');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Run analysis simulation
+        function runAnalysis(type) {
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+            resultsSection.style.display = 'none';
+            sourcesSection.style.display = 'none';
+            
+            // Simulate analysis delay
+            setTimeout(() => {
+                loadingIndicator.style.display = 'none';
+                resultsSection.style.display = 'block';
+                
+                // Generate random results for demonstration
+                const plagiarismScore = type === 'plagiarism' ? Math.floor(Math.random() * 40) : Math.floor(Math.random() * 15);
+                const aiScore = type === 'ai' ? Math.floor(Math.random() * 30 + 20) : Math.floor(Math.random() * 15);
+                
+                // Update plagiarism results
+                plagiarismValue.textContent = `${plagiarismScore}%`;
+                plagiarismBar.style.width = `${plagiarismScore}%`;
+                
+                if (plagiarismScore < 10) {
+                    plagiarismLabel.textContent = 'Original Content';
+                    plagiarismDescription.textContent = 'Your content shows no significant signs of plagiarism.';
+                } else if (plagiarismScore < 20) {
+                    plagiarismLabel.textContent = 'Mostly Original';
+                    plagiarismDescription.textContent = 'Your content shows minor similarities with other sources.';
+                } else if (plagiarismScore < 30) {
+                    plagiarismLabel.textContent = 'Possible Plagiarism';
+                    plagiarismDescription.textContent = 'Your content shows moderate similarities that may need review.';
+                } else {
+                    plagiarismLabel.textContent = 'Likely Plagiarized';
+                    plagiarismDescription.textContent = 'Your content shows significant similarities with other sources.';
+                }
+                
+                // Update AI results
+                aiValue.textContent = `${aiScore}%`;
+                aiBar.style.width = `${aiScore}%`;
+                
+                if (aiScore < 15) {
+                    aiLabel.textContent = 'Human Written';
+                    aiDescription.textContent = 'Your content appears to be written by a human.';
+                } else if (aiScore < 25) {
+                    aiLabel.textContent = 'Likely Human';
+                    aiDescription.textContent = 'Your content shows minimal signs of AI generation.';
+                } else if (aiScore < 35) {
+                    aiLabel.textContent = 'Possibly AI';
+                    aiDescription.textContent = 'Some parts of your content may be AI-generated.';
+                } else {
+                    aiLabel.textContent = 'Likely AI-Generated';
+                    aiDescription.textContent = 'Your content shows significant signs of AI generation.';
+                }
+                
+                // Show sources if plagiarism score is high
+                if (plagiarismScore > 15) {
+                    sourcesSection.style.display = 'block';
+                    generateSources();
+                }
+            }, 2500);
+        }
+        
+        // Generate sample sources
+        function generateSources() {
+            sourceList.innerHTML = '';
+            
+            const sources = [
+                { url: 'https://en.wikipedia.org/wiki/Plagiarism', similarity: Math.floor(Math.random() * 20 + 15) },
+                { url: 'https://www.scribbr.com/category/plagiarism/', similarity: Math.floor(Math.random() * 15 + 10) },
+                { url: 'https://www.grammarly.com/blog/plagiarism/', similarity: Math.floor(Math.random() * 10 + 5) },
+                { url: 'https://www.ox.ac.uk/students/academic/guidance/skills/plagiarism', similarity: Math.floor(Math.random() * 10 + 5) }
+            ];
+            
+            sources.forEach(source => {
+                const li = document.createElement('li');
+                li.className = 'source-item';
+                li.innerHTML = `
+                    <a href="${source.url}" class="source-url" target="_blank">${source.url}</a>
+                    <span class="source-similarity">${source.similarity}% similar</span>
+                `;
+                sourceList.appendChild(li);
+            });
+        }
+        
+        // Initialize
+        wordCount.textContent = '0';
+    </script>
+</body>
+</html>
